@@ -1,0 +1,162 @@
+<div class="dashboard-wrapper">
+  <!-- Top Title / Actions -->
+  <div class="flex-between header-section">
+    <div>
+      <h1 class="page-title">Dashboard Overview</h1>
+      <p class="subtitle">Quick insights into SK Hardware inventory health and financials.</p>
+    </div>
+    <div class="quick-actions">
+      <a routerLink="/sales" class="btn btn-primary">
+        <span class="material-symbols-rounded">shopping_cart_checkout</span>
+        <span>New Sale (POS)</span>
+      </a>
+      <a routerLink="/purchases" class="btn btn-teal">
+        <span class="material-symbols-rounded">add_business</span>
+        <span>Restock Items</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading business analytics...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <!-- KPI Summary Grid -->
+    <div class="grid-4 kpi-grid">
+      <div class="glass-card kpi-card">
+        <div class="flex-between">
+          <div>
+            <span class="kpi-label">Total Products</span>
+            <h3 class="kpi-value">{{ stats.totalProducts }}</h3>
+          </div>
+          <div class="kpi-icon-wrapper bg-blue">
+            <span class="material-symbols-rounded">handyman</span>
+          </div>
+        </div>
+        <p class="kpi-subtext"><span class="success-text">Active</span> items in catalog</p>
+      </div>
+
+      <div class="glass-card kpi-card" [class.warning-border]="stats.lowStockProducts > 0">
+        <div class="flex-between">
+          <div>
+            <span class="kpi-label">Low Stock Alerts</span>
+            <h3 class="kpi-value" [class.danger-text]="stats.lowStockProducts > 0">{{ stats.lowStockProducts }}</h3>
+          </div>
+          <div class="kpi-icon-wrapper" [class.bg-orange]="stats.lowStockProducts > 0" [class.bg-green]="stats.lowStockProducts === 0">
+            <span class="material-symbols-rounded">warning</span>
+          </div>
+        </div>
+        <p class="kpi-subtext" *ngIf="stats.lowStockProducts > 0">
+          <span class="danger-text">Requires immediate restock</span>
+        </p>
+        <p class="kpi-subtext" *ngIf="stats.lowStockProducts === 0">
+          <span class="success-text">Stock levels healthy</span>
+        </p>
+      </div>
+
+      <div class="glass-card kpi-card">
+        <div class="flex-between">
+          <div>
+            <span class="kpi-label">Total Sales Revenue</span>
+            <h3 class="kpi-value">₹{{ stats.totalSales | number:'1.2-2' }}</h3>
+          </div>
+          <div class="kpi-icon-wrapper bg-green">
+            <span class="material-symbols-rounded">payments</span>
+          </div>
+        </div>
+        <p class="kpi-subtext">Total generated revenue</p>
+      </div>
+
+      <div class="glass-card kpi-card">
+        <div class="flex-between">
+          <div>
+            <span class="kpi-label">Inventory Investment</span>
+            <h3 class="kpi-value">₹{{ stats.totalPurchases | number:'1.2-2' }}</h3>
+          </div>
+          <div class="kpi-icon-wrapper bg-purple">
+            <span class="material-symbols-rounded">inventory</span>
+          </div>
+        </div>
+        <p class="kpi-subtext">Total restock purchases</p>
+      </div>
+    </div>
+
+    <!-- Chart Grid -->
+    <div class="glass-card chart-card">
+      <h2 class="section-title">Sales Revenue Trend (Last 7 Days)</h2>
+      <div class="canvas-container">
+        <canvas #trendCanvas></canvas>
+      </div>
+    </div>
+
+    <!-- Recent Logs Grid -->
+    <div class="grid-2 detail-grid">
+      <!-- Recent Sales -->
+      <div class="glass-card table-card">
+        <div class="flex-between card-header">
+          <h2 class="section-title">Recent Sales</h2>
+          <a routerLink="/billing" class="view-all-link">View All Invoices</a>
+        </div>
+        <div class="table-container" *ngIf="stats.recentSales?.length > 0">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Invoice</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let sale of stats.recentSales">
+                <td><span class="invoice-tag">{{ sale.invoice_number }}</span></td>
+                <td>{{ sale.customer_name }}</td>
+                <td><strong>₹{{ sale.total_amount | number:'1.2-2' }}</strong></td>
+                <td>{{ sale.sale_date | date:'dd MMM yyyy' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="empty-state" *ngIf="!stats.recentSales || stats.recentSales.length === 0">
+          <span class="material-symbols-rounded">receipt</span>
+          <p>No sales registered yet.</p>
+        </div>
+      </div>
+
+      <!-- Recent Restocks -->
+      <div class="glass-card table-card">
+        <div class="flex-between card-header">
+          <h2 class="section-title">Recent Purchases (Stock In)</h2>
+          <a routerLink="/purchases" class="view-all-link">View Restocks</a>
+        </div>
+        <div class="table-container" *ngIf="stats.recentPurchases?.length > 0">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Purchase No</th>
+                <th>Supplier</th>
+                <th>Cost</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let pur of stats.recentPurchases">
+                <td><span class="purchase-tag">{{ pur.purchase_number }}</span></td>
+                <td>{{ pur.supplier_name }}</td>
+                <td><strong>₹{{ pur.total_amount | number:'1.2-2' }}</strong></td>
+                <td>{{ pur.purchase_date | date:'dd MMM yyyy' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="empty-state" *ngIf="!stats.recentPurchases || stats.recentPurchases.length === 0">
+          <span class="material-symbols-rounded">local_shipping</span>
+          <p>No restock records found.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

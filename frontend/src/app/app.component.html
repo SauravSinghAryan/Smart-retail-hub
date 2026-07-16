@@ -1,0 +1,186 @@
+<div class="login-only-layout" *ngIf="router.url === '/login'">
+  <router-outlet></router-outlet>
+</div>
+
+<div class="app-container"
+     [class.sidebar-collapsed]="!isSidebarOpen"
+     *ngIf="router.url !== '/login'">
+
+  <!-- ================= Sidebar ================= -->
+  <aside class="sidebar no-print">
+
+    <!-- Brand -->
+    <div class="sidebar-brand">
+
+      <div class="brand-icon">
+        <span class="material-symbols-rounded">storefront</span>
+      </div>
+
+      <div class="brand">
+  <img src="assets/logo.png" alt="Smart Retail Hub Logo" class="brand-logo">
+
+  <div class="brand-text">
+    <!-- <h2>Smart Retail Hub</h2> -->
+    <!-- <span>Inventory • Sales • Billing</span> -->
+  </div>
+</div>
+
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+
+      <a routerLink="/dashboard"
+         routerLinkActive="active"
+         class="nav-item">
+
+        <span class="material-symbols-rounded">dashboard</span>
+        <span>Dashboard</span>
+
+      </a>
+
+      <a routerLink="/products"
+         routerLinkActive="active"
+         class="nav-item">
+
+        <span class="material-symbols-rounded">inventory_2</span>
+        <span>Products Inventory</span>
+
+      </a>
+
+      <a routerLink="/sales"
+         routerLinkActive="active"
+         class="nav-item">
+
+        <span class="material-symbols-rounded">point_of_sale</span>
+        <span>Sales (POS)</span>
+
+      </a>
+
+      <a routerLink="/purchases"
+         routerLinkActive="active"
+         class="nav-item">
+
+        <span class="material-symbols-rounded">shopping_cart</span>
+        <span>Purchases</span>
+
+      </a>
+
+      <a routerLink="/billing"
+         routerLinkActive="active"
+         class="nav-item">
+
+        <span class="material-symbols-rounded">receipt_long</span>
+        <span>Billing & Invoices</span>
+
+      </a>
+
+    </nav>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+
+      <div class="user-profile">
+
+        <div class="user-avatar">
+          SR
+        </div>
+
+        <div class="user-info">
+
+          <!-- Later this will come from JWT -->
+          <p class="user-name">
+            Welcome
+          </p>
+
+          <span class="user-role">
+            Logged In User
+          </span>
+
+        </div>
+
+      </div>
+
+      <button
+        class="logout-btn"
+        (click)="onLogout()">
+
+        <span class="material-symbols-rounded">
+          logout
+        </span>
+
+        <span>
+          Logout
+        </span>
+
+      </button>
+
+      <div class="sidebar-bottom">
+
+  <p class="copyright">
+    © {{ currentYear }} Smart Retail Hub
+  </p>
+
+  <small class="developer">
+    Developed by
+    <span class="developer-name">Saurav Singh Aryan</span>
+  </small>
+
+</div>
+
+    </div>
+
+  </aside>
+
+  <!-- ================= Main ================= -->
+  <div class="main-content">
+
+    <header class="header no-print">
+
+      <button
+        class="toggle-btn"
+        (click)="toggleSidebar()">
+
+        <span class="material-symbols-rounded">
+          menu
+        </span>
+
+      </button>
+
+      <div class="header-title">
+
+        <h3>
+          🛒 Smart Retail Hub
+        </h3>
+
+        <span>
+          Inventory • Sales • Billing
+        </span>
+
+      </div>
+
+      <div class="header-right">
+
+        <div class="status-indicator">
+
+          <span class="status-dot online"></span>
+
+          <span>
+            System Online
+          </span>
+
+        </div>
+
+      </div>
+
+    </header>
+
+    <main class="page-container">
+
+      <router-outlet></router-outlet>
+
+    </main>
+
+  </div>
+
+</div>

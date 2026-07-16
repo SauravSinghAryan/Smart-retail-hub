@@ -1,0 +1,318 @@
+<div class="billing-wrapper">
+  <div class="header-section no-print">
+    <h1 class="page-title">Billing & Invoice Records</h1>
+    <p class="subtitle">Search sales transaction history, review customer receipts, and reprint invoices.</p>
+  </div>
+
+  <div class="glass-card toolbar-card no-print">
+    <div class="search-box">
+      <span class="material-symbols-rounded search-icon">search</span>
+      <input type="text" placeholder="Search invoices by invoice number, customer name, or phone..."
+        class="form-control" [(ngModel)]="searchTerm" (ngModelChange)="onSearch()" />
+    </div>
+  </div>
+
+  <div class="loading-overlay" *ngIf="isLoading && !isDetailModalOpen">
+    <div class="spinner"></div>
+    <p>Loading invoice records...</p>
+  </div>
+
+  <div class="glass-card table-card no-print" *ngIf="!isLoading">
+    <div class="table-container" *ngIf="filteredInvoices.length > 0">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Invoice No</th>
+            <th>Customer Name</th>
+            <th>Customer Phone</th>
+            <th>Payment Method</th>
+            <th>Billed Total</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let inv of filteredInvoices">
+            <td>
+              <span class="invoice-tag">
+                {{ inv.invoiceNumber }}
+              </span>
+            </td>
+
+            <td>
+              <strong>{{ inv.customerName }}</strong>
+            </td>
+
+            <td class="text-secondary">
+              {{ inv.customerPhone || 'N/A' }}
+            </td>
+
+            <td>
+              <span class="pay-method-badge">
+                {{ inv.paymentMethod }}
+              </span>
+            </td>
+
+            <td>
+              <strong>
+                ₹{{ inv.totalAmount | number:'1.2-2' }}
+              </strong>
+            </td>
+
+            <td>
+              {{ inv.saleDate | date:'dd MMM yyyy, hh:mm a' }}
+            </td>
+
+            <td>
+              <button class="btn btn-secondary btn-icon"
+                (click)="viewInvoiceDetails(inv.id)"
+                title="View Receipt Details">
+                <span class="material-symbols-rounded">visibility</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="empty-state" *ngIf="filteredInvoices.length === 0">
+      <span class="material-symbols-rounded">receipt</span>
+      <p>No matching invoice records found.</p>
+    </div>
+  </div>
+
+
+  <div class="modal-overlay print-receipt-overlay"
+    *ngIf="isDetailModalOpen"
+    (click)="closeDetailModal()">
+
+    <div class="modal-content receipt-modal-content"
+      (click)="$event.stopPropagation()">
+
+      <div class="modal-header flex-between no-print">
+
+        <h2>Invoice Review</h2>
+
+        <div class="action-buttons">
+
+          <button class="btn btn-primary" (click)="printInvoice()">
+            <span class="material-symbols-rounded">print</span>
+            <span>Print Invoice</span>
+          </button>
+
+          <button class="btn btn-secondary btn-icon"
+            (click)="closeDetailModal()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+
+        </div>
+      </div>
+
+
+      <div id="printInvoice" class="modal-body invoice-print-area">
+        <div class="invoice-header text-center">
+
+          <h1 class="invoice-brand">
+           SMART RETAIL HUB 
+          </h1>
+
+          <p class="invoice-address">
+            Raja Bazar, Building Material & Power Tools Hub
+          </p>
+
+          <p class="invoice-contact">
+            Phone: +91 9005468912 | GSTIN: GSTIN45632178PS633
+          </p>
+
+          <div class="divider"></div>
+
+        </div>
+
+
+        <div class="invoice-meta grid-2">
+
+          <div>
+
+            <p>
+              <strong>Invoice Number:</strong>
+              {{ selectedInvoice?.invoiceNumber }}
+            </p>
+
+            <p>
+              <strong>Date:</strong>
+              {{ selectedInvoice?.saleDate | date:'dd-MMM-yyyy hh:mm a' }}
+            </p>
+
+            <p>
+              <strong>Payment Method:</strong>
+              {{ selectedInvoice?.paymentMethod }}
+            </p>
+
+          </div>
+
+
+          <div class="text-right">
+
+            <p>
+              <strong>Billed To:</strong>
+            </p>
+
+            <p>
+              {{ selectedInvoice?.customerName }}
+            </p>
+
+            <p *ngIf="selectedInvoice?.customerPhone">
+              Phone:
+              {{ selectedInvoice?.customerPhone }}
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="invoice-items-table">
+
+          <table class="receipt-table">
+
+            <thead>
+
+              <tr>
+                <th>Item / SKU</th>
+                <th class="text-center">Qty</th>
+                <th class="text-right">Rate</th>
+                <th class="text-right">Amount</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              <tr *ngFor="let item of selectedInvoice?.items">
+
+                <td>
+
+                  <p class="item-name">
+                    {{ item.productName }}
+                  </p>
+
+                  <span class="item-sku">
+                    {{ item.productSku }}
+                  </span>
+
+                </td>
+
+
+                <td class="text-center">
+                  {{ item.quantity }}
+                </td>
+
+
+                <td class="text-right">
+                  ₹{{ item.pricePerUnit | number:'1.2-2' }}
+                </td>
+
+
+                <td class="text-right">
+                  ₹{{ item.subTotal | number:'1.2-2' }}
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <div class="invoice-summary">
+
+
+          <div class="calc-row flex-between">
+
+            <span>
+              Subtotal:
+            </span>
+
+            <span>
+              ₹{{ selectedInvoice?.subTotal | number:'1.2-2' }}
+            </span>
+
+          </div>
+
+
+
+          <div class="calc-row flex-between"
+            *ngIf="selectedInvoice?.discount > 0">
+
+            <span>
+              Discount:
+            </span>
+
+            <span>
+              -₹{{ selectedInvoice?.discount | number:'1.2-2' }}
+            </span>
+
+          </div>
+
+
+
+          <div class="calc-row flex-between">
+
+            <span>
+              GST Tax ({{ selectedInvoice?.taxRate }}%):
+            </span>
+
+            <span>
+              ₹{{ selectedInvoice?.taxAmount | number:'1.2-2' }}
+            </span>
+
+          </div>
+
+
+
+          <div class="divider"></div>
+
+
+          <div class="calc-row flex-between total-row">
+
+            <span>
+              TOTAL AMOUNT:
+            </span>
+
+            <span>
+              ₹{{ selectedInvoice?.totalAmount | number:'1.2-2' }}
+            </span>
+
+          </div>
+
+
+        </div>
+
+
+
+        <div class="invoice-footer text-center">
+
+          <div class="divider"></div>
+
+          <p class="thank-you-msg">
+            Thank you for business with SMART RETAIL HUB!
+          </p>
+
+          <p class="terms">
+            Goods once sold will not be returned. Subject to Local Jurisdiction.
+          </p>
+
+        </div>
+
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

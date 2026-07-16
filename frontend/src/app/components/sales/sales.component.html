@@ -1,0 +1,652 @@
+<div class="sales-wrapper">
+
+<div class="header-section no-print">
+
+<div>
+<h1 class="page-title">
+Sales Checkout (POS)
+</h1>
+
+<p class="subtitle">
+Quickly ring up hardware items, manage discounts, and generate billing invoices.
+</p>
+</div>
+
+</div>
+
+
+<div class="grid-layout no-print">
+
+
+<!-- ================= CATALOG SECTION LEFT ================= -->
+
+<div class="catalog-section">
+
+
+<div class="glass-card catalog-search-card">
+
+<div class="search-box">
+
+<span class="material-symbols-rounded search-icon">
+search
+</span>
+
+
+<input
+type="text"
+class="form-control"
+placeholder="Search product name or SKU..."
+[(ngModel)]="searchQuery"
+(ngModelChange)="onSearchChange()">
+
+
+</div>
+
+</div>
+
+
+
+<div class="catalog-items-grid"
+*ngIf="!isLoading">
+
+
+<div
+class="glass-card catalog-item-card"
+*ngFor="let p of filteredProducts"
+[class.out-of-stock]="p.quantity<=0"
+(click)="p.quantity>0 && addToCart(p)">
+
+
+
+<div class="flex-between">
+
+
+<span class="sku">
+{{p.sku}}
+</span>
+
+
+<span
+class="stock-badge"
+[class.warning]="p.quantity>0 && p.quantity<=p.min_stock_level"
+[class.danger]="p.quantity<=0">
+
+
+{{p.quantity>0 ? p.quantity+' Left' : 'Out Of Stock'}}
+
+
+</span>
+
+
+</div>
+
+
+
+<h3 class="name">
+{{p.name}}
+</h3>
+
+
+
+<p class="category">
+{{p.category}}
+</p>
+
+
+
+<div class="price-row flex-between">
+
+
+<span class="price">
+₹{{p.price | number:'1.2-2'}}
+</span>
+
+
+
+<button
+type="button"
+class="add-btn btn btn-secondary btn-icon"
+[disabled]="p.quantity<=0">
+
+
+<span class="material-symbols-rounded">
+add_shopping_cart
+</span>
+
+
+</button>
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+<div class="empty-state"
+*ngIf="!isLoading && filteredProducts.length===0">
+
+
+<span class="material-symbols-rounded">
+inventory_2
+</span>
+
+<p>
+No products found.
+</p>
+
+
+</div>
+
+
+
+<div class="loading-overlay"
+*ngIf="isLoading">
+
+
+<div class="spinner"></div>
+
+<p>
+Loading products...
+</p>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+<!-- ================= BILLING CART RIGHT ================= -->
+
+<div class="cart-section">
+
+
+<div class="glass-card cart-card">
+
+
+
+<div class="flex-between cart-header">
+
+
+<div>
+
+<h2>
+Billing Cart
+</h2>
+
+
+<p>
+{{cart.length}} Item(s)
+</p>
+
+
+</div>
+
+
+
+<button
+class="btn btn-secondary btn-icon"
+(click)="clearCart()"
+[disabled]="cart.length===0">
+
+
+<span class="material-symbols-rounded">
+delete_sweep
+</span>
+
+
+</button>
+
+
+</div>
+
+
+
+
+
+<div class="cart-items-container">
+
+
+<div
+class="cart-item"
+*ngFor="let item of cart">
+
+
+<div class="flex-between">
+
+
+<div>
+
+<span class="cart-item-sku">
+{{item.sku}}
+</span>
+
+
+<h4>
+{{item.name}}
+</h4>
+
+
+</div>
+
+
+
+<button
+class="remove-item-btn"
+(click)="removeFromCart(item)">
+
+
+<span class="material-symbols-rounded">
+close
+</span>
+
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+<div class="quantity-controls">
+
+
+<button
+class="qty-btn"
+(click)="updateQuantity(item,-1)">
+-
+</button>
+
+
+
+<input
+type="number"
+class="qty-input"
+[(ngModel)]="item.quantity"
+(ngModelChange)="onQuantityInput(item)">
+
+
+
+<button
+class="qty-btn"
+(click)="updateQuantity(item,1)">
++
+</button>
+
+
+
+</div>
+
+
+
+<div class="flex-between">
+
+<span>
+Subtotal
+</span>
+
+
+<strong>
+₹{{item.subtotal | number:'1.2-2'}}
+</strong>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+<div
+class="cart-empty-state"
+*ngIf="cart.length===0">
+
+
+<span class="material-symbols-rounded">
+shopping_cart
+</span>
+
+
+<p>
+Your cart is empty
+</p>
+
+
+</div>
+
+
+</div>
+        <!-- CUSTOMER AND BILLING DETAILS -->
+
+        <div class="checkout-fields">
+
+
+          <div class="error-banner"
+               *ngIf="errorMessage">
+
+            <span class="material-symbols-rounded">
+              error
+            </span>
+
+            {{errorMessage}}
+
+          </div>
+
+
+
+
+          <div class="form-group">
+
+            <label>
+              Customer Name
+            </label>
+
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Enter customer name"
+              [(ngModel)]="customerName">
+
+          </div>
+
+
+
+
+          <div class="grid-2">
+
+
+            <div class="form-group">
+
+              <label>
+                Phone Number
+              </label>
+
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Enter phone number"
+                [(ngModel)]="customerPhone">
+
+            </div>
+
+
+
+
+            <div class="form-group">
+
+              <label>
+                Payment Method
+              </label>
+
+
+              <select
+                class="form-control"
+                [(ngModel)]="paymentMethod">
+
+
+                <option value="Cash">
+                  Cash
+                </option>
+
+
+                <option value="UPI">
+                  UPI / QR
+                </option>
+
+
+                <option value="Card">
+                  Card
+                </option>
+
+
+              </select>
+
+
+            </div>
+
+
+          </div>
+
+
+
+
+
+
+          <div class="grid-2">
+
+
+            <div class="form-group">
+
+              <label>
+                Discount Amount (₹)
+              </label>
+
+
+              <input
+                type="number"
+                class="form-control"
+                min="0"
+                [(ngModel)]="discount"
+                (change)="calculateBill()">
+
+
+            </div>
+
+
+
+
+
+            <div class="form-group">
+
+              <label>
+                GST Rate (%)
+              </label>
+
+
+              <select
+                class="form-control"
+                [(ngModel)]="taxRate"
+                (change)="calculateBill()">
+
+
+                <option [value]="0">
+                  0% GST
+                </option>
+
+
+                <option [value]="5">
+                  5% GST
+                </option>
+
+
+                <option [value]="12">
+                  12% GST
+                </option>
+
+
+                <option [value]="18">
+                  18% GST
+                </option>
+
+
+                <option [value]="28">
+                  28% GST
+                </option>
+
+
+              </select>
+
+
+            </div>
+
+
+
+          </div>
+
+
+
+
+
+
+          <!-- BILL SUMMARY -->
+
+
+          <div class="calculation-panel">
+
+
+            <div class="calc-row flex-between">
+
+
+              <span>
+                Subtotal
+              </span>
+
+
+              <strong>
+                ₹{{subtotal | number:'1.2-2'}}
+              </strong>
+
+
+            </div>
+
+
+
+
+
+            <div
+              class="calc-row flex-between"
+              *ngIf="discount>0">
+
+
+              <span>
+                Discount
+              </span>
+
+
+              <strong>
+                - ₹{{discount | number:'1.2-2'}}
+              </strong>
+
+
+            </div>
+
+
+
+
+
+
+            <div class="calc-row flex-between">
+
+
+              <span>
+                GST ({{taxRate}}%)
+              </span>
+
+
+              <strong>
+                ₹{{taxAmount | number:'1.2-2'}}
+              </strong>
+
+
+            </div>
+
+
+
+
+
+
+            <div class="calc-row flex-between total-row">
+
+
+              <span>
+                Total Payable
+              </span>
+
+
+              <strong>
+                ₹{{totalAmount | number:'1.2-2'}}
+              </strong>
+
+
+            </div>
+
+
+          </div>
+
+
+
+
+
+
+
+          <!-- CHECKOUT BUTTON -->
+
+
+          <button
+            class="btn btn-primary checkout-btn"
+            (click)="checkout()"
+            [disabled]="isCheckingOut || cart.length===0">
+
+
+
+            <span
+              class="material-symbols-rounded"
+              *ngIf="!isCheckingOut">
+
+              check_circle
+
+            </span>
+
+
+
+            <span
+              class="spinner-small"
+              *ngIf="isCheckingOut">
+            </span>
+
+
+
+
+            {{
+              isCheckingOut
+              ? 'Processing Sale...'
+              : 'Complete Sale'
+            }}
+
+
+
+          </button>
+
+
+
+
+        </div>
+
+
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+</div>

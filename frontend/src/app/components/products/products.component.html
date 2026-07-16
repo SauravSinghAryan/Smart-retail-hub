@@ -1,0 +1,255 @@
+<div class="products-wrapper">
+  <!-- Title / Actions -->
+  <div class="flex-between header-section">
+    <div>
+      <h1 class="page-title">Products Inventory</h1>
+      <p class="subtitle">Search, catalog, and control stock thresholds for SMART RETAIL HUB supplies.</p>
+    </div>
+    <button class="btn btn-primary" (click)="openAddModal()">
+      <span class="material-symbols-rounded">add_circle</span>
+      <span>Add New Product</span>
+    </button>
+  </div>
+
+  <!-- Filters Toolbar -->
+  <div class="glass-card toolbar-card">
+    <div class="toolbar-top">
+      <div class="search-box">
+        <span class="material-symbols-rounded search-icon">search</span>
+        <input 
+          type="text" 
+          placeholder="Search by name or SKU..." 
+          class="form-control" 
+          [(ngModel)]="searchTerm" 
+          (ngModelChange)="onSearch()" />
+      </div>
+      <button 
+        class="btn btn-secondary low-stock-toggle" 
+        [class.active]="showLowStockOnly" 
+        (click)="toggleLowStock()">
+        <span class="material-symbols-rounded">warning</span>
+        <span>Low Stock Alerts Only</span>
+      </button>
+    </div>
+
+    <!-- Category Filter Row -->
+    <div class="categories-filter">
+      <span class="filter-label">Categories:</span>
+      <div class="cat-pills">
+        <button 
+          *ngFor="let cat of categories" 
+          class="cat-pill" 
+          [class.active]="selectedCategory === cat" 
+          (click)="onFilterCategory(cat)">
+          {{ cat }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading inventory list...</p>
+  </div>
+
+  <!-- Products Table -->
+  <div class="glass-card table-card" *ngIf="!isLoading">
+    <div class="table-container" *ngIf="products.length > 0">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Quantity</th>
+            <th>Cost Price</th>
+            <th>Sell Price</th>
+            <th>Supplier</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of products">
+            <td><span class="sku-tag">{{ p.sku }}</span></td>
+            <td>
+              <div class="product-name-cell">
+                <span class="name">{{ p.name }}</span>
+              </div>
+            </td>
+            <td><span class="category-tag">{{ p.category }}</span></td>
+            <td>
+              <div class="quantity-cell">
+                <span 
+                  class="badge" 
+                  [class.badge-danger]="p.quantity === 0"
+                  [class.badge-warning]="p.quantity > 0 && p.quantity <= p.min_stock_level"
+                  [class.badge-success]="p.quantity > p.min_stock_level">
+                  {{ p.quantity }} in stock
+                </span>
+                <span class="low-stock-icon material-symbols-rounded" *ngIf="p.quantity <= p.min_stock_level" title="Low stock threshold met">warning</span>
+              </div>
+            </td>
+            <td>₹{{ p.cost | number:'1.2-2' }}</td>
+            <td>₹{{ p.price | number:'1.2-2' }}</td>
+            <td class="text-secondary">{{ p.supplier || 'N/A' }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-secondary btn-icon" (click)="openEditModal(p)" title="Edit Product">
+                  <span class="material-symbols-rounded">edit</span>
+                </button>
+                <button class="btn btn-danger btn-icon" (click)="deleteProduct(p.id, p.name)" title="Delete Product">
+                  <span class="material-symbols-rounded">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="products.length === 0">
+      <span class="material-symbols-rounded">inventory</span>
+      <p>No products match the selected filters.</p>
+    </div>
+  </div>
+
+  <!-- ADD PRODUCT MODAL -->
+  <div class="modal-overlay" *ngIf="isAddModalOpen" (click)="closeAddModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header flex-between">
+        <h2>Catalog New Product</h2>
+        <button class="btn btn-secondary btn-icon" (click)="closeAddModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <form (submit)="submitAddProduct()">
+        <div class="modal-body">
+          <div class="error-banner" *ngIf="errorMessage">
+            <span class="material-symbols-rounded">error</span>
+            <span>{{ errorMessage }}</span>
+          </div>
+
+          <div class="form-group">
+            <label for="name">Product Name *</label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Bosch Angle Grinder" [(ngModel)]="productForm.name" required />
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="category">Category *</label>
+              <select id="category" name="category" class="form-control" [(ngModel)]="productForm.category" (change)="onCategoryChange()" required>
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="sku">SKU Code (Auto/Custom) *</label>
+              <input type="text" id="sku" name="sku" class="form-control" style="text-transform: uppercase;" [(ngModel)]="productForm.sku" required />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="cost">Cost Price (₹ Purchase) *</label>
+              <input type="number" id="cost" name="cost" class="form-control" min="0" step="0.01" [(ngModel)]="productForm.cost" required />
+            </div>
+            <div class="form-group">
+              <label for="price">Selling Price (₹ Customer) *</label>
+              <input type="number" id="price" name="price" class="form-control" min="0" step="0.01" [(ngModel)]="productForm.price" required />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="quantity">Initial Stock Quantity</label>
+              <input type="number" id="quantity" name="quantity" class="form-control" min="0" [(ngModel)]="productForm.quantity" />
+            </div>
+            <div class="form-group">
+              <label for="min_stock_level">Min Stock Alert Threshold</label>
+              <input type="number" id="min_stock_level" name="min_stock_level" class="form-control" min="0" [(ngModel)]="productForm.min_stock_level" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="supplier">Supplier Name</label>
+            <input type="text" id="supplier" name="supplier" class="form-control" placeholder="Supplier or manufacturer" [(ngModel)]="productForm.supplier" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeAddModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT PRODUCT MODAL -->
+  <div class="modal-overlay" *ngIf="isEditModalOpen" (click)="closeEditModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header flex-between">
+        <h2>Modify Catalog Details</h2>
+        <button class="btn btn-secondary btn-icon" (click)="closeEditModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <form (submit)="submitEditProduct()">
+        <div class="modal-body">
+          <div class="error-banner" *ngIf="errorMessage">
+            <span class="material-symbols-rounded">error</span>
+            <span>{{ errorMessage }}</span>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-name">Product Name *</label>
+            <input type="text" id="edit-name" name="name" class="form-control" [(ngModel)]="productForm.name" required />
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="edit-category">Category *</label>
+              <select id="edit-category" name="category" class="form-control" [(ngModel)]="productForm.category" required>
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-sku">SKU Code *</label>
+              <input type="text" id="edit-sku" name="sku" class="form-control" style="text-transform: uppercase;" [(ngModel)]="productForm.sku" required />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="edit-cost">Cost Price (₹) *</label>
+              <input type="number" id="edit-cost" name="cost" class="form-control" min="0" step="0.01" [(ngModel)]="productForm.cost" required />
+            </div>
+            <div class="form-group">
+              <label for="edit-price">Selling Price (₹) *</label>
+              <input type="number" id="edit-price" name="price" class="form-control" min="0" step="0.01" [(ngModel)]="productForm.price" required />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="edit-quantity">Stock Quantity *</label>
+              <input type="number" id="edit-quantity" name="quantity" class="form-control" min="0" [(ngModel)]="productForm.quantity" required />
+            </div>
+            <div class="form-group">
+              <label for="edit-min_stock_level">Min Stock Alert Threshold *</label>
+              <input type="number" id="edit-min_stock_level" name="min_stock_level" class="form-control" min="0" [(ngModel)]="productForm.min_stock_level" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-supplier">Supplier Name</label>
+            <input type="text" id="edit-supplier" name="supplier" class="form-control" [(ngModel)]="productForm.supplier" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

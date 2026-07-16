@@ -1,0 +1,182 @@
+<div class="purchases-wrapper">
+  <!-- Title / Actions -->
+  <div class="flex-between header-section">
+    <div>
+      <h1 class="page-title">Restock Purchases</h1>
+      <p class="subtitle">Log inventory restocking invoices, update product buy-costs, and track supplier receipts.</p>
+    </div>
+    
+    <!-- Tab Switches -->
+    <div class="tab-controls">
+      <button 
+        class="btn" 
+        [class.btn-primary]="activeTab === 'history'" 
+        [class.btn-secondary]="activeTab !== 'history'" 
+        (click)="switchTab('history')">
+        <span class="material-symbols-rounded">history</span>
+        <span>Purchase Logs</span>
+      </button>
+      <button 
+        class="btn" 
+        [class.btn-teal]="activeTab === 'new'" 
+        [class.btn-secondary]="activeTab !== 'new'" 
+        (click)="switchTab('new')">
+        <span class="material-symbols-rounded">add_circle</span>
+        <span>Record Stock In</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-overlay" *ngIf="isLoading && activeTab === 'history'">
+    <div class="spinner"></div>
+    <p>Loading purchase logs...</p>
+  </div>
+
+  <!-- Tab 1: Purchase History Log -->
+  <div class="glass-card table-card" *ngIf="activeTab === 'history' && !isLoading">
+    <div class="table-container" *ngIf="purchases.length > 0">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Purchase Order No</th>
+            <th>Supplier Name</th>
+            <th>Total Cost Price</th>
+            <th>Log Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of purchases">
+            <td><span class="purchase-tag">{{ p.purchase_number }}</span></td>
+            <td><strong>{{ p.supplier_name }}</strong></td>
+            <td>₹{{ p.total_amount | number:'1.2-2' }}</td>
+            <td>{{ p.purchase_date | date:'dd MMM yyyy, hh:mm a' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="purchases.length === 0">
+      <span class="material-symbols-rounded">local_shipping</span>
+      <p>No restock purchases recorded yet.</p>
+    </div>
+  </div>
+
+  <!-- Tab 2: New Purchase / Stock-In Entry Form -->
+  <div class="new-purchase-section" *ngIf="activeTab === 'new'">
+    <div class="error-banner" *ngIf="errorMessage">
+      <span class="material-symbols-rounded">error</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <div class="grid-layout">
+      <!-- Left Column: Add Items Picker and Form -->
+      <div class="form-panel">
+        <div class="glass-card supplier-card">
+          <h2 class="section-title">Supplier Information</h2>
+          <div class="form-group">
+            <label for="supplier-name">Supplier / Distributor Name *</label>
+            <input 
+              type="text" 
+              id="supplier-name" 
+              class="form-control" 
+              placeholder="e.g. Stanley Black & Decker India" 
+              [(ngModel)]="supplierName" />
+          </div>
+        </div>
+
+        <div class="glass-card picker-card">
+          <h2 class="section-title">Select Item to Restock</h2>
+          
+          <div class="form-group">
+            <label for="item-select">Choose Product *</label>
+            <select 
+              id="item-select" 
+              class="form-control" 
+              [(ngModel)]="selectedProductId" 
+              (change)="onProductSelect()">
+              <option [value]="0">-- Select Hardware --</option>
+              <option *ngFor="let prod of products" [value]="prod.id">
+                [{{ prod.sku }}] {{ prod.name }} (Current: {{ prod.quantity }})
+              </option>
+            </select>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="temp-qty">Restock Quantity *</label>
+              <input type="number" id="temp-qty" class="form-control" min="1" [(ngModel)]="tempQuantity" />
+            </div>
+            <div class="form-group">
+              <label for="temp-cost">Unit Buy Cost (₹) *</label>
+              <input type="number" id="temp-cost" class="form-control" min="0" step="0.01" [(ngModel)]="tempCost" />
+            </div>
+          </div>
+
+          <button class="btn btn-secondary add-item-btn" (click)="addItemToPurchase()">
+            <span class="material-symbols-rounded">add_shopping_cart</span>
+            <span>Add to Purchase List</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column: Current restock list -->
+      <div class="list-panel">
+        <div class="glass-card items-card">
+          <h2 class="section-title">Restocking Items List</h2>
+          
+          <div class="table-container" *ngIf="purchaseItems.length > 0">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Product</th>
+                  <th class="text-center">Qty</th>
+                  <th>Cost</th>
+                  <th>Subtotal</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of purchaseItems; let i = index">
+                  <td><span class="sku-tag">{{ item.sku }}</span></td>
+                  <td>{{ item.name }}</td>
+                  <td class="text-center"><strong>{{ item.quantity }}</strong></td>
+                  <td>₹{{ item.cost_per_unit | number:'1.2-2' }}</td>
+                  <td>₹{{ item.subtotal | number:'1.2-2' }}</td>
+                  <td>
+                    <button class="remove-btn" (click)="removeItem(i)">
+                      <span class="material-symbols-rounded">delete</span>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty list indicator -->
+          <div class="empty-list" *ngIf="purchaseItems.length === 0">
+            <span class="material-symbols-rounded">playlist_add</span>
+            <p>No restock items selected yet.</p>
+            <span>Fill out the form on the left to queue items.</span>
+          </div>
+
+          <!-- Summary and Submit -->
+          <div class="submit-section" *ngIf="purchaseItems.length > 0">
+            <div class="divider"></div>
+            <div class="flex-between total-row">
+              <span>Total Investment Cost:</span>
+              <span class="total-text">₹{{ totalCost | number:'1.2-2' }}</span>
+            </div>
+            <button class="btn btn-teal submit-btn" (click)="submitPurchase()" [disabled]="isSaving">
+              <span class="material-symbols-rounded" *ngIf="!isSaving">save</span>
+              <span class="spinner-small" *ngIf="isSaving"></span>
+              <span>{{ isSaving ? 'Logging Stock In...' : 'Save & Update Stock' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
