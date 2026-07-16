@@ -114,7 +114,7 @@ var app = builder.Build();
     app.UseSwagger();
     app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseCors("AllowAngular");
 
@@ -123,5 +123,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapGet("/", () => "Smart Retail Hub API is running successfully!");
 
 app.Run();
