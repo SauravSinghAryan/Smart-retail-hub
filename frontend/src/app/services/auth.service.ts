@@ -22,7 +22,7 @@ export class AuthService {
   private http = inject(HttpClient);
 
   // ASP.NET Core Backend
-  private baseUrl = 'https://localhost:7168/api/auth';
+ private baseUrl = 'https://smart-retail-hub.onrender.com/api/auth';
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
 

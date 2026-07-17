@@ -96,7 +96,7 @@
               class="form-control" 
               [(ngModel)]="selectedProductId" 
               (change)="onProductSelect()">
-              <option [value]="0">-- Select Hardware --</option>
+              <option [value]="0">-- Select Products/Items --</option>
               <option *ngFor="let prod of products" [value]="prod.id">
                 [{{ prod.sku }}] {{ prod.name }} (Current: {{ prod.quantity }})
               </option>

@@ -7,8 +7,8 @@ import { Observable } from 'rxjs';
 })
 export class ApiService {
 
-  private baseUrl = 'https://localhost:7168/api';
-
+  private baseUrl = 'https://smart-retail-hub.onrender.com/api';
+  
   constructor(private http: HttpClient) { }
 
   private getHeaders() {
