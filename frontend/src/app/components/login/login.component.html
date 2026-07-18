@@ -1,470 +1,347 @@
 <div class="login-wrapper">
 
-  <!-- Background -->
-  <div class="glow-orb orb-1"></div>
-  <div class="glow-orb orb-2"></div>
+<div class="glow-orb orb-1"></div>
+<div class="glow-orb orb-2"></div>
 
-  <div class="login-container glass-card">
+<div class="login-container">
 
-    <!-- ===================================================== -->
-    <!-- BRAND HEADER -->
-    <!-- ===================================================== -->
+<div class="login-left">
 
-    <div class="brand-header">
+<div class="left-content">
 
-      <div class="brand-logo-wrapper">
-        <span class="material-symbols-rounded brand-logo">
-          storefront
-        </span>
-      </div>
+<div class="left-image">
+<img src="assets/icon.png" alt="Smart Retail Hub">
+</div>
 
-      <h1>Smart Retail Hub</h1>
+<div class="left-features">
 
-      <p class="brand-subtitle">
-        Inventory • Sales • Billing
-      </p>
+<div class="feature-card">
+<div class="feature-icon">
+<i class="bi bi-box-seam"></i>
+</div>
+<div class="feature-info">
+<h4>Inventory Management</h4>
+<p>Monitor stock, products and warehouse activities in real time.</p>
+</div>
+</div>
 
-      <small class="brand-description">
+<div class="feature-card">
+<div class="feature-icon">
+<i class="bi bi-receipt-cutoff"></i>
+</div>
+<div class="feature-info">
+<h4>Smart Billing</h4>
+<p>Create GST invoices instantly with accurate calculations.</p>
+</div>
+</div>
 
-        Complete Retail Shop Management System
+<div class="feature-card">
+<div class="feature-icon">
+<i class="bi bi-graph-up-arrow"></i>
+</div>
+<div class="feature-info">
+<h4>Sales Analytics</h4>
+<p>Analyze revenue, purchases and business growth from one dashboard.</p>
+</div>
+</div>
 
-      </small>
+</div>
 
-    </div>
+</div>
 
-    <!-- ===================================================== -->
-    <!-- ALERTS -->
-    <!-- ===================================================== -->
+</div>
 
-    <div class="alert alert-danger" *ngIf="errorMessage">
+<div class="login-right">
 
-      <span class="material-symbols-rounded">
-        error
-      </span>
+<div class="brand-header">
 
-      <p>{{ errorMessage }}</p>
+<div class="brand-logo-wrapper">
+<i class="bi bi-shop brand-logo"></i>
+</div>
 
-    </div>
+<h1>SMART RETAIL HUB</h1>
 
-    <div class="alert alert-success" *ngIf="successMessage">
+<p class="brand-subtitle">
+Inventory • Sales • Billing
+</p>
 
-      <span class="material-symbols-rounded">
-        check_circle
-      </span>
+<p class="brand-description">
+Complete Retail Shop Management System
+</p>
 
-      <p>{{ successMessage }}</p>
+</div>
 
-    </div>
+<div class="alert alert-danger" *ngIf="errorMessage">
+<i class="bi bi-exclamation-circle-fill"></i>
+<p>{{errorMessage}}</p>
+</div>
 
-    <!-- ===================================================== -->
-    <!-- LOGIN -->
-    <!-- ===================================================== -->
+<div class="alert alert-success" *ngIf="successMessage">
+<i class="bi bi-check-circle-fill"></i>
+<p>{{successMessage}}</p>
+</div>
 
-   <form
-  *ngIf="isLoginMode"
-  #loginForm="ngForm"
-  (ngSubmit)="onLogin()">
+<div class="form-section">
 
-  <!-- <div class="login-logo">
-    <img src="assets/logo.png" alt="Smart Retail Hub Logo">
-  </div> -->
+<form
+*ngIf="isLoginMode"
+#loginForm="ngForm"
+(ngSubmit)="onLogin()">
 
-  <h2 class="form-title">
+<h2 class="form-title">
+Welcome Back 👋
+</h2>
 
-    Welcome Back 👋
+<div class="form-group">
 
-  </h2>
+<label>
+Username
+</label>
 
-      <!-- Username -->
+<div class="input-icon-wrapper">
 
-      <div class="form-group">
+<i class="bi bi-person input-icon"></i>
 
-        <label>
+<input
+class="form-control"
+type="text"
+name="username"
+placeholder="Enter Username"
+[(ngModel)]="loginData.username"
+required
+[disabled]="isLoading">
 
-          Username
+</div>
 
-        </label>
+</div>
+<div class="form-group">
 
-        <div class="input-icon-wrapper">
+<label>
+Password
+</label>
 
-          <span class="material-symbols-rounded input-icon">
+<div class="input-icon-wrapper">
 
-            person
+<i class="bi bi-lock input-icon"></i>
 
-          </span>
+<input
+class="form-control"
+type="password"
+name="password"
+placeholder="Enter Password"
+[(ngModel)]="loginData.password"
+required
+[disabled]="isLoading">
 
-          <input
+</div>
 
-            class="form-control"
+</div>
 
-            type="text"
+<button
+class="btn btn-primary w-100 btn-submit"
+type="submit"
+[disabled]="isLoading">
 
-            name="username"
+<span *ngIf="!isLoading">
+<i class="bi bi-box-arrow-in-right"></i>
+</span>
 
-            placeholder="Enter Username"
+<span
+*ngIf="isLoading"
+class="spinner">
+</span>
 
-            [(ngModel)]="loginData.username"
+{{isLoading ? 'Signing In...' : 'Sign In'}}
 
-            required
+</button>
 
-            [disabled]="isLoading">
+<div class="toggle-mode-text">
 
-        </div>
+Don't have an account?
 
-      </div>
+<a
+href="javascript:void(0)"
+(click)="toggleMode()">
 
-      <!-- Password -->
+Create Account
 
-      <div class="form-group">
+</a>
 
-        <label>
+</div>
 
-          Password
+</form>
 
-        </label>
+<form
+*ngIf="!isLoginMode"
+#signupForm="ngForm"
+(ngSubmit)="onSignup()">
 
-        <div class="input-icon-wrapper">
+<h2 class="form-title">
+Register New User
+</h2>
 
-          <span class="material-symbols-rounded input-icon">
+<p class="form-subtitle">
+Create a new account for your retail shop.
+</p>
 
-            lock
+<div class="form-row">
 
-          </span>
+<div class="form-group half">
 
-          <input
+<label>
+Full Name
+</label>
 
-            class="form-control"
+<div class="input-icon-wrapper">
 
-            type="password"
+<i class="bi bi-person-vcard input-icon"></i>
 
-            name="password"
+<input
+class="form-control"
+type="text"
+name="name"
+placeholder="Enter Full Name"
+[(ngModel)]="signupData.name"
+required
+[disabled]="isLoading">
 
-            placeholder="Enter Password"
+</div>
 
-            [(ngModel)]="loginData.password"
+</div>
 
-            required
+<div class="form-group half">
 
-            [disabled]="isLoading">
+<label>
+User Role
+</label>
 
-        </div>
+<div class="input-icon-wrapper">
 
-      </div>
+<i class="bi bi-person-workspace input-icon"></i>
 
-      <button
+<select
+class="form-control"
+name="role"
+[(ngModel)]="signupData.role"
+[disabled]="isLoading">
 
-        class="btn btn-primary w-100 btn-submit"
+<option value="Admin">Administrator</option>
 
-        type="submit"
+<option value="Manager">Manager</option>
 
-        [disabled]="isLoading">
+<option value="Cashier">Cashier</option>
 
-        <span
-          *ngIf="!isLoading"
-          class="material-symbols-rounded">
+<option value="Storekeeper">Storekeeper</option>
 
-          login
+<option value="Inventory">Inventory Executive</option>
 
-        </span>
+</select>
 
-        <span
-          *ngIf="isLoading"
-          class="spinner">
+</div>
 
-        </span>
+</div>
 
-        {{ isLoading ? 'Signing In...' : 'Sign In' }}
+</div>
 
-      </button>
+<div class="form-group">
 
-      <div class="toggle-mode-text">
+<label>
+Username
+</label>
 
-        Don't have an account?
+<div class="input-icon-wrapper">
 
-        <a
-          href="javascript:void(0)"
-          (click)="toggleMode()">
+<i class="bi bi-person input-icon"></i>
 
-          Create Account
+<input
+class="form-control"
+type="text"
+name="username"
+placeholder="Choose Username"
+[(ngModel)]="signupData.username"
+required
+[disabled]="isLoading">
 
-        </a>
+</div>
 
-      </div>
+</div>
+<div class="form-group">
 
-    </form>
+<label>
+Password
+</label>
 
-    <!-- ===================================================== -->
-    <!-- SIGNUP -->
-    <!-- ===================================================== -->
+<div class="input-icon-wrapper">
 
-    <form
+<i class="bi bi-lock input-icon"></i>
 
-      *ngIf="!isLoginMode"
+<input
+class="form-control"
+type="password"
+name="password"
+placeholder="Create Password"
+[(ngModel)]="signupData.password"
+required
+[disabled]="isLoading">
 
-      #signupForm="ngForm"
+</div>
 
-      (ngSubmit)="onSignup()">
+</div>
 
-      <h2 class="form-title">
+<button
+class="btn btn-success w-100 btn-submit"
+type="submit"
+[disabled]="isLoading">
 
-        Register New User
+<span *ngIf="!isLoading">
+<i class="bi bi-person-plus-fill"></i>
+</span>
 
-      </h2>
+<span
+*ngIf="isLoading"
+class="spinner">
+</span>
 
-      <p class="form-subtitle">
+{{isLoading ? 'Creating Account...' : 'Create Account'}}
 
-        Create a new account for your retail shop.
+</button>
 
-      </p>
+<div class="toggle-mode-text">
 
-      <!-- Name -->
+Already have an account?
 
-      <div class="form-group">
+<a
+href="javascript:void(0)"
+(click)="toggleMode()">
 
-        <label>
+Sign In
 
-          Full Name
+</a>
 
-        </label>
+</div>
 
-        <div class="input-icon-wrapper">
+</form>
 
-          <span class="material-symbols-rounded input-icon">
+</div>
 
-            badge
+<div class="login-footer">
 
-          </span>
+<p>
+© {{currentYear}} Smart Retail Hub
+</p>
 
-          <input
+<small>
+Developed by
+</small>
 
-            class="form-control"
+<div class="developer-name">
+Saurav Singh Aryan
+</div>
 
-            type="text"
+</div>
 
-            name="name"
+</div>
 
-            placeholder="Enter Full Name"
-
-            [(ngModel)]="signupData.name"
-
-            required
-
-            [disabled]="isLoading">
-
-        </div>
-
-      </div>
-
-      <!-- Username -->
-
-      <div class="form-group">
-
-        <label>
-
-          Username
-
-        </label>
-
-        <div class="input-icon-wrapper">
-
-          <span class="material-symbols-rounded input-icon">
-
-            person
-
-          </span>
-
-          <input
-
-            class="form-control"
-
-            type="text"
-
-            name="username"
-
-            placeholder="Choose Username"
-
-            [(ngModel)]="signupData.username"
-
-            required
-
-            [disabled]="isLoading">
-
-        </div>
-
-      </div>
-
-      <!-- Password -->
-
-      <div class="form-group">
-
-        <label>
-
-          Password
-
-        </label>
-
-        <div class="input-icon-wrapper">
-
-          <span class="material-symbols-rounded input-icon">
-
-            lock
-
-          </span>
-
-          <input
-
-            class="form-control"
-
-            type="password"
-
-            name="password"
-
-            placeholder="Create Password"
-
-            [(ngModel)]="signupData.password"
-
-            required
-
-            [disabled]="isLoading">
-
-        </div>
-
-      </div>
-
-      <!-- Role -->
-
-      <div class="form-group">
-
-        <label>
-
-          User Role
-
-        </label>
-
-        <div class="input-icon-wrapper">
-
-          <span class="material-symbols-rounded input-icon">
-
-            manage_accounts
-
-          </span>
-
-          <select
-
-            class="form-control"
-
-            name="role"
-
-            [(ngModel)]="signupData.role"
-
-            [disabled]="isLoading">
-
-            <option value="Admin">
-              Administrator
-            </option>
-
-            <option value="Manager">
-              Manager
-            </option>
-
-            <option value="Cashier">
-              Cashier
-            </option>
-
-            <option value="Storekeeper">
-              Storekeeper
-            </option>
-
-            <option value="Inventory">
-              Inventory Executive
-            </option>
-
-          </select>
-
-        </div>
-
-      </div>
-
-      <button
-
-        class="btn btn-teal w-100 btn-submit"
-
-        type="submit"
-
-        [disabled]="isLoading">
-
-        <span
-
-          *ngIf="!isLoading"
-
-          class="material-symbols-rounded">
-
-          how_to_reg
-
-        </span>
-
-        <span
-
-          *ngIf="isLoading"
-
-          class="spinner">
-
-        </span>
-
-        {{ isLoading ? 'Creating Account...' : 'Register User' }}
-
-      </button>
-
-      <div class="toggle-mode-text">
-
-        Already have an account?
-
-        <a
-
-          href="javascript:void(0)"
-
-          (click)="toggleMode()">
-
-          Sign In
-
-        </a>
-
-      </div>
-
-    </form>
-
-    <!-- ===================================================== -->
-    <!-- FOOTER -->
-    <!-- ===================================================== -->
-
-    <div class="login-footer">
-
-      <p>
-
-        © {{ currentYear }} Smart Retail Hub
-
-      </p>
-
-      <small>
-
-        Inventory • Sales • Billing
-
-      </small>
-
-      <small>
-
-        Developed by
-
-        <strong>
-
-          Saurav Singh Aryan
-
-        </strong>
-
-      </small>
-
-    </div>
-
-  </div>
+</div>
 
 </div>
